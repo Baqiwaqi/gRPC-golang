@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package flightTracking;
+
+option go_package = "example.com/baqiwaqi/golang-grpc-servive";
+
+service FlightTracking {
+  rpc GetFlight(MyService.Flight.Request) returns (MyService.Flight.Response);
+  rpc ListFlights(MyService.Flight.Request) returns (stream MyService.Flight.Response);
+}
+
+message NoParams {}
+
+message MyService {
+  message Flight {
+    int32 id = 1;
+    string number = 2;
+    Airline airline = 3;
+    Airport departure = 4;
+    Airport arrival = 5;
+
+    message Request { int32 id = 1; }
+    message Response { Flight flight = 1; }
+    message NoParams {}
+  }
+
+  message Airport {
+    string code = 1;
+    string name = 2;
+    string city = 3;
+    string country = 4;
+  }
+
+  message Airline {
+    string code = 1;
+    string name = 2;
+    string country = 3;
+  }
+}
+
+// message Airport {
+//   string code = 1;
+//   string name = 2;
+//   string city = 3;
+//   string country = 4;
+// }
+
+// message Flight {
+//   int32 flight_id = 1;
+//   string flight_number = 2;
+//   string airline_name = 3;
+//   Airport departure = 4;
+//   Airport arrival = 5;
+// }
+
+// message FlightRequest {
+//   int32 flight_id = 1;
+// }
