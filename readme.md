@@ -12,12 +12,15 @@
 - Realtime updates
 - Run in docker
 
+## Todo
+<!-- create Todo's here -->
 ## Commands
 
 This commmand will show usefull information about the conatiner.
-`
-docker inspect "conatiner name"
-`
+
+```bash
+docker inspect "container name"
+```
 
 ## Server
 
@@ -28,6 +31,8 @@ Golang server
 ```bash
 go run main.go
 ```
+
+Open [http://localhost:3000](http://localhost:50052) with your browser to see the result.
 
 ### Docker Server
 
