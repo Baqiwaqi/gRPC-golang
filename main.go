@@ -8,21 +8,21 @@ import (
 
 	"time"
 
-	pb "example.com/baqiwaqi/golang-grpc-servive/src/proto/service"
+	pb "example.com/baqiwaqi/golang-grpc-servive/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 const (
-	port = ":50051"
+	port = ":50052"
 )
 
 var (
 	ErrFlightNotFound = status.Error(codes.NotFound, "Flight not found")
 )
 
-// carray of mock flights
+// array of mock flights
 var flights = []*pb.MyService_Flight{
 	{
 		Id:     1,
@@ -68,27 +68,13 @@ var flights = []*pb.MyService_Flight{
 
 type TrackingServer struct {
 	pb.UnimplementedFlightTrackingServer
-
 	flightCh chan *pb.MyService_Flight
 }
-
-// func (t *TrackingServer) streamFlights() {
-// 	log.Printf("Starting streamFlights")
-// 	for {
-// 		select {
-// 		case flight := <-t.flightCh:
-// 			pretty.Log("flight", flight)
-// 		}
-// 		if t.flightCh == nil {
-// 			break
-// 		}
-// 	}
-// }
 
 func (t *TrackingServer) generateFakeFlights() {
 	for {
 		select {
-		case fake := <-time.After(5 * time.Second):
+		case fake := <-time.After(1 * time.Second):
 			t.flightCh <- &pb.MyService_Flight{
 				Id:     1,
 				Number: strconv.Itoa(int(fake.Unix())),
@@ -97,7 +83,7 @@ func (t *TrackingServer) generateFakeFlights() {
 	}
 }
 
-// function getFlight
+// function GetFlight
 func (s *TrackingServer) GetFlight(ctx context.Context, req *pb.MyService_Flight_Request) (*pb.MyService_Flight_Response, error) {
 	log.Printf("GetFlight: %v", req)
 	for _, f := range flights {
@@ -108,13 +94,8 @@ func (s *TrackingServer) GetFlight(ctx context.Context, req *pb.MyService_Flight
 	return nil, ErrFlightNotFound
 }
 
-// function listFlights
-func (s *TrackingServer) ListFlights(req *pb.MyService_Flight_Request, stream pb.FlightTracking_ListFlightsServer) error {
-	log.Printf("ListFlights: %v", req)
-	// for _, f := range flights {
-	// 	res := &pb.MyService_Flight_Response{Flight: f}
-	// 	stream.Send(res)
-	// }
+func (s *TrackingServer) StreamFlights(req *pb.MyService_Flight_Request, stream pb.FlightTracking_StreamFlightsServer) error {
+	log.Printf("Stream flights: %v", req)
 	for {
 		select {
 		case flight := <-s.flightCh:
@@ -130,13 +111,9 @@ func (s *TrackingServer) ListFlights(req *pb.MyService_Flight_Request, stream pb
 	return nil
 }
 
-func (t *TrackingServer) CreateFlight() error {
-	log.Printf("CreateFlight")
-	// fake logic to save flight into db
-	// end of fake logic
-	// publish flight on channel
-	t.flightCh <- &pb.MyService_Flight{}
-	return nil
+func (s *TrackingServer) ListFlights(ctx context.Context, req *pb.MyService_Flight_Request) (*pb.MyService_Flight_ListResponse, error) {
+	log.Printf("List flights: %v", req)
+	return &pb.MyService_Flight_ListResponse{Flights: flights}, nil
 }
 
 func main() {
@@ -149,12 +126,6 @@ func main() {
 
 	trackingServer.flightCh = make(chan *pb.MyService_Flight)
 	defer close(trackingServer.flightCh)
-	//go trackingServer.streamFlights()
-	// go func() {
-	// 	for _, f := range flights {
-	// 		trackingServer.flightCh <- f
-	// 	}
-	// }()
 	go trackingServer.generateFakeFlights()
 
 	s := grpc.NewServer()

@@ -4,6 +4,17 @@
 var grpc = require('@grpc/grpc-js');
 var service_tracking_pb = require('../service/tracking_pb.js');
 
+function serialize_flightTracking_MyService_Flight_ListResponse(arg) {
+  if (!(arg instanceof service_tracking_pb.MyService.Flight.ListResponse)) {
+    throw new Error('Expected argument of type flightTracking.MyService.Flight.ListResponse');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_flightTracking_MyService_Flight_ListResponse(buffer_arg) {
+  return service_tracking_pb.MyService.Flight.ListResponse.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
 function serialize_flightTracking_MyService_Flight_Request(arg) {
   if (!(arg instanceof service_tracking_pb.MyService.Flight.Request)) {
     throw new Error('Expected argument of type flightTracking.MyService.Flight.Request');
@@ -39,8 +50,8 @@ var FlightTrackingService = exports.FlightTrackingService = {
     responseSerialize: serialize_flightTracking_MyService_Flight_Response,
     responseDeserialize: deserialize_flightTracking_MyService_Flight_Response,
   },
-  listFlights: {
-    path: '/flightTracking.FlightTracking/ListFlights',
+  streamFlights: {
+    path: '/flightTracking.FlightTracking/StreamFlights',
     requestStream: false,
     responseStream: true,
     requestType: service_tracking_pb.MyService.Flight.Request,
@@ -49,6 +60,17 @@ var FlightTrackingService = exports.FlightTrackingService = {
     requestDeserialize: deserialize_flightTracking_MyService_Flight_Request,
     responseSerialize: serialize_flightTracking_MyService_Flight_Response,
     responseDeserialize: deserialize_flightTracking_MyService_Flight_Response,
+  },
+  listFlights: {
+    path: '/flightTracking.FlightTracking/ListFlights',
+    requestStream: false,
+    responseStream: false,
+    requestType: service_tracking_pb.MyService.Flight.Request,
+    responseType: service_tracking_pb.MyService.Flight.ListResponse,
+    requestSerialize: serialize_flightTracking_MyService_Flight_Request,
+    requestDeserialize: deserialize_flightTracking_MyService_Flight_Request,
+    responseSerialize: serialize_flightTracking_MyService_Flight_ListResponse,
+    responseDeserialize: deserialize_flightTracking_MyService_Flight_ListResponse,
   },
 };
 
