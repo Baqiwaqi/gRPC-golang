@@ -14,6 +14,9 @@
 
 ## Todo
 <!-- create Todo's here -->
+- [ ] Create Dockerfile for generating gRPC proto files
+- [ ] Create docker-compose.yml
+
 ## Commands
 
 This commmand will show usefull information about the conatiner.
