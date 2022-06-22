@@ -23,8 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type FlightTrackingClient interface {
 	GetFlight(ctx context.Context, in *MyService_Flight_Request, opts ...grpc.CallOption) (*MyService_Flight_Response, error)
-	StreamFlights(ctx context.Context, in *MyService_Flight_Request, opts ...grpc.CallOption) (FlightTracking_StreamFlightsClient, error)
-	ListFlights(ctx context.Context, in *MyService_Flight_Request, opts ...grpc.CallOption) (*MyService_Flight_ListResponse, error)
+	ListFlights(ctx context.Context, in *MyService_Flight_Request, opts ...grpc.CallOption) (FlightTracking_ListFlightsClient, error)
 }
 
 type flightTrackingClient struct {
@@ -44,12 +43,12 @@ func (c *flightTrackingClient) GetFlight(ctx context.Context, in *MyService_Flig
 	return out, nil
 }
 
-func (c *flightTrackingClient) StreamFlights(ctx context.Context, in *MyService_Flight_Request, opts ...grpc.CallOption) (FlightTracking_StreamFlightsClient, error) {
-	stream, err := c.cc.NewStream(ctx, &FlightTracking_ServiceDesc.Streams[0], "/flightTracking.FlightTracking/StreamFlights", opts...)
+func (c *flightTrackingClient) ListFlights(ctx context.Context, in *MyService_Flight_Request, opts ...grpc.CallOption) (FlightTracking_ListFlightsClient, error) {
+	stream, err := c.cc.NewStream(ctx, &FlightTracking_ServiceDesc.Streams[0], "/flightTracking.FlightTracking/ListFlights", opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &flightTrackingStreamFlightsClient{stream}
+	x := &flightTrackingListFlightsClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -59,16 +58,16 @@ func (c *flightTrackingClient) StreamFlights(ctx context.Context, in *MyService_
 	return x, nil
 }
 
-type FlightTracking_StreamFlightsClient interface {
+type FlightTracking_ListFlightsClient interface {
 	Recv() (*MyService_Flight_Response, error)
 	grpc.ClientStream
 }
 
-type flightTrackingStreamFlightsClient struct {
+type flightTrackingListFlightsClient struct {
 	grpc.ClientStream
 }
 
-func (x *flightTrackingStreamFlightsClient) Recv() (*MyService_Flight_Response, error) {
+func (x *flightTrackingListFlightsClient) Recv() (*MyService_Flight_Response, error) {
 	m := new(MyService_Flight_Response)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -76,22 +75,12 @@ func (x *flightTrackingStreamFlightsClient) Recv() (*MyService_Flight_Response, 
 	return m, nil
 }
 
-func (c *flightTrackingClient) ListFlights(ctx context.Context, in *MyService_Flight_Request, opts ...grpc.CallOption) (*MyService_Flight_ListResponse, error) {
-	out := new(MyService_Flight_ListResponse)
-	err := c.cc.Invoke(ctx, "/flightTracking.FlightTracking/ListFlights", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // FlightTrackingServer is the server API for FlightTracking service.
 // All implementations must embed UnimplementedFlightTrackingServer
 // for forward compatibility
 type FlightTrackingServer interface {
 	GetFlight(context.Context, *MyService_Flight_Request) (*MyService_Flight_Response, error)
-	StreamFlights(*MyService_Flight_Request, FlightTracking_StreamFlightsServer) error
-	ListFlights(context.Context, *MyService_Flight_Request) (*MyService_Flight_ListResponse, error)
+	ListFlights(*MyService_Flight_Request, FlightTracking_ListFlightsServer) error
 	mustEmbedUnimplementedFlightTrackingServer()
 }
 
@@ -102,11 +91,8 @@ type UnimplementedFlightTrackingServer struct {
 func (UnimplementedFlightTrackingServer) GetFlight(context.Context, *MyService_Flight_Request) (*MyService_Flight_Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetFlight not implemented")
 }
-func (UnimplementedFlightTrackingServer) StreamFlights(*MyService_Flight_Request, FlightTracking_StreamFlightsServer) error {
-	return status.Errorf(codes.Unimplemented, "method StreamFlights not implemented")
-}
-func (UnimplementedFlightTrackingServer) ListFlights(context.Context, *MyService_Flight_Request) (*MyService_Flight_ListResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListFlights not implemented")
+func (UnimplementedFlightTrackingServer) ListFlights(*MyService_Flight_Request, FlightTracking_ListFlightsServer) error {
+	return status.Errorf(codes.Unimplemented, "method ListFlights not implemented")
 }
 func (UnimplementedFlightTrackingServer) mustEmbedUnimplementedFlightTrackingServer() {}
 
@@ -139,43 +125,25 @@ func _FlightTracking_GetFlight_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
-func _FlightTracking_StreamFlights_Handler(srv interface{}, stream grpc.ServerStream) error {
+func _FlightTracking_ListFlights_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(MyService_Flight_Request)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(FlightTrackingServer).StreamFlights(m, &flightTrackingStreamFlightsServer{stream})
+	return srv.(FlightTrackingServer).ListFlights(m, &flightTrackingListFlightsServer{stream})
 }
 
-type FlightTracking_StreamFlightsServer interface {
+type FlightTracking_ListFlightsServer interface {
 	Send(*MyService_Flight_Response) error
 	grpc.ServerStream
 }
 
-type flightTrackingStreamFlightsServer struct {
+type flightTrackingListFlightsServer struct {
 	grpc.ServerStream
 }
 
-func (x *flightTrackingStreamFlightsServer) Send(m *MyService_Flight_Response) error {
+func (x *flightTrackingListFlightsServer) Send(m *MyService_Flight_Response) error {
 	return x.ServerStream.SendMsg(m)
-}
-
-func _FlightTracking_ListFlights_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(MyService_Flight_Request)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(FlightTrackingServer).ListFlights(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/flightTracking.FlightTracking/ListFlights",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FlightTrackingServer).ListFlights(ctx, req.(*MyService_Flight_Request))
-	}
-	return interceptor(ctx, in, info, handler)
 }
 
 // FlightTracking_ServiceDesc is the grpc.ServiceDesc for FlightTracking service.
@@ -189,15 +157,11 @@ var FlightTracking_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "GetFlight",
 			Handler:    _FlightTracking_GetFlight_Handler,
 		},
-		{
-			MethodName: "ListFlights",
-			Handler:    _FlightTracking_ListFlights_Handler,
-		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "StreamFlights",
-			Handler:       _FlightTracking_StreamFlights_Handler,
+			StreamName:    "ListFlights",
+			Handler:       _FlightTracking_ListFlights_Handler,
 			ServerStreams: true,
 		},
 	},
